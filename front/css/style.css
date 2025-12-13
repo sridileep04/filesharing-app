@@ -1,0 +1,194 @@
+/* ========== GLOBAL ========= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+body {
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Background Gradient */
+.gradient-bg {
+    background: linear-gradient(135deg, #6e00ff, #0099ff);
+    background-size: 200% 200%;
+    animation: gradientShift 8s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* ========== GLASS CARD ========= */
+.glass-card {
+    backdrop-filter: blur(15px);
+    background: rgba(255, 255, 255, 0.15);
+    padding: 40px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 450px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+}
+
+.center-box {
+    text-align: center;
+}
+
+.form-card {
+    max-width: 520px;
+}
+
+/* ========== TYPOGRAPHY ========= */
+.title {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.title-sm {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.subtitle {
+    font-size: 16px;
+    opacity: 0.9;
+    margin-bottom: 25px;
+}
+
+/* ========== BUTTONS ========= */
+.btn {
+    padding: 12px 24px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.25s ease;
+    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+}
+
+.primary {
+    background: #007bff;
+}
+
+.secondary {
+    background: transparent;
+    border: 2px solid #fff;
+}
+
+.success {
+    background: #00c46b;
+}
+
+.primary:hover,
+.success:hover {
+    opacity: 0.85;
+}
+
+.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.link {
+    background: none;
+    padding: 0;
+    color: #e3e3e3;
+    text-decoration: underline;
+    border-radius: 0;
+}
+
+.button-row {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.space-between {
+    justify-content: space-between;
+}
+
+/* ========== INPUTS ========= */
+.label {
+    margin-top: 15px;
+    margin-bottom: 5px;
+}
+
+.input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    margin-bottom: 10px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.4);
+    color: #000;
+    font-size: 15px;
+}
+
+.input:focus {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+/* ========== RESULTS & ERRORS ========= */
+.result-box {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.25);
+    text-align: center;
+}
+
+.big-code {
+    font-size: 40px;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.error-box {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255, 0, 0, 0.35);
+    color: #fff;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Fade animation */
+.fade-in {
+    animation: fade 0.9s ease both;
+}
+
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(25px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

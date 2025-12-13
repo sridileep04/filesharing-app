@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Send — Sharely</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet">
+</head>
+
+<body class="gradient-bg">
+
+    <div class="glass-card form-card fade-in">
+        <h2 class="title-sm">Send a file</h2>
+
+        <form id="sendForm" enctype="multipart/form-data">
+            <label class="label">Choose file (max 100MB)</label>
+            <input type="file" id="file" name="file" required class="input">
+
+            <label class="label">Password (required)</label>
+            <input type="password" id="password" name="password" minlength="4" required class="input">
+
+            <div class="button-row space-between">
+                <button type="submit" class="btn primary">Upload & Get Code</button>
+                <a onclick="history.back();" class="btn link">Back</a>
+            </div>
+        </form>
+
+        <div id="result" class="result-box hidden">
+            <h3>File uploaded!</h3>
+            <p>Your 5-digit code:</p>
+            <p class="big-code" id="codeDisplay"></p>
+            <p>Share this code + password with the receiver.</p>
+        </div>
+
+        <div id="error" class="error-box hidden"></div>
+    </div>
+
+    <script src="js/send.js"></script>
+</body>
+
+</html>
