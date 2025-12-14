@@ -2,10 +2,10 @@ const FileMeta = require("../models/FileMeta");
 const deleteGridFsFile = require("../utils/deleteGridFsFile");
 
 module.exports = function startCleanupJob(app) {
-    const INTERVAL = 5 * 60 * 1000; // 5 minutes
+    const INTERVAL = 30 * 60 * 1000; // 5 minutes
 
     setInterval(async () => {
-        console.log("♻️ Cleaning expired files...");
+        console.log("Cleaning expired files...");
 
         try {
             const now = new Date();
@@ -23,7 +23,7 @@ module.exports = function startCleanupJob(app) {
                 await deleteGridFsFile(bucket, file.gridFsId);
                 await FileMeta.deleteOne({ _id: file._id });
 
-                console.log(`🗑 Removed expired file: ${file.originalname}`);
+                console.log(`Removed expired file: ${file.originalname}`);
             }
         } catch (err) {
             console.error("Cleanup job failed:", err);

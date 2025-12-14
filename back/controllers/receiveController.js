@@ -10,8 +10,9 @@ exports.verifyCodePassword = async (req, res) => {
 
         if (!fileMeta) return res.status(404).json({ error: "Code not found" });
 
+        const bucket = req.app.locals.gfsBucket;
         if (new Date() > fileMeta.expiresAt) {
-            await deleteGridFsFile(fileMeta.gridFsId);
+            await deleteGridFsFile(bucket, fileMeta.gridFsId);
             await FileMeta.deleteOne({ _id: fileMeta._id });
 
             return res.status(410).json({
@@ -23,10 +24,9 @@ exports.verifyCodePassword = async (req, res) => {
         if (!match) return res.status(403).json({ error: "Wrong password" });
 
         if (fileMeta.downloadsLeft == 0) {
+            await deleteGridFsFile(bucket, fileMeta.gridFsId);
+            await FileMeta.deleteOne({ _id: fileMeta._id });
             return res.status(403).json({ error: "There are no downloads left" });
-        }
-        if (fileMeta.downloadsUsed > fileMeta.allowedDownloads) {
-            return res.status(403).json({ error: "Download limit reached" });
         }
 
         const token = crypto.randomBytes(20).toString('hex');
@@ -77,10 +77,9 @@ exports.downloadFile = async (req, res) => {
         if (tokenObj.used || new Date() > tokenObj.expiresAt)
             return res.status(403).send("Expired or already used");
         if (fileMeta.downloadsLeft == 0) {
+            await deleteGridFsFile(fileMeta.gridFsId);
+            await FileMeta.deleteOne({ _id: fileMeta._id });
             return res.status(403).send("There are no downloads left");
-        }
-        if (fileMeta.downloadsUsed >= fileMeta.allowedDownloads) {
-            return res.status(403).send("Download limit reached");
         }
 
         const gfsBucket = req.app.locals.gfsBucket;
@@ -88,7 +87,6 @@ exports.downloadFile = async (req, res) => {
 
         tokenObj.used = true;
         fileMeta.downloadsLeft -= 1;
-        fileMeta.downloadsUsed += 1
         await fileMeta.save();
 
         res.set("Content-Type", fileMeta.contentType);

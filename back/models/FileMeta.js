@@ -15,12 +15,7 @@ const FileMetaSchema = new mongoose.Schema({
         used: { type: Boolean, default: false }
     }],
     downloadsLeft: { type: Number, default: 1 }, // optional: single-use by default
-
-    expiresAt: { type: Date, required: true },
-
-    // NEW: Allowed download logic
-    allowedDownloads: { type: Number, default: 1 },
-    downloadsUsed: { type: Number, default: 0 },
+    expiresAt: { type: Date, required: true }
 });
 
 module.exports = mongoose.model('FileMeta', FileMetaSchema);
