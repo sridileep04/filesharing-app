@@ -5,7 +5,7 @@ document.getElementById('verifyForm').addEventListener('submit', async (e) => {
     const password = document.getElementById('password').value;
 
     try {
-        const res = await fetch('http://localhost:3000/api/verify', {
+        const res = await fetch('/api/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ code, password })
