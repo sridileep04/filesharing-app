@@ -1,6 +1,7 @@
 This is a file sharing app.
 
 Sample .env file
+```
 PORT=3000
 MONGODB_URL=""
 BASE_URL=http://localhost:3000
