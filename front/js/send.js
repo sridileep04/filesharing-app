@@ -20,7 +20,7 @@ document.getElementById('sendForm').addEventListener('submit', async (e) => {
     form.append('password', passwordInput.value);
 
     try {
-        const res = await fetch('http://localhost:3000/api/send', {
+        const res = await fetch('/api/send', {
             method: 'POST',
             body: form
         });
