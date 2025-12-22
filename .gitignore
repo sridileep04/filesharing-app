@@ -1,5 +1,6 @@
 # dependencies
 node_modules/
+npm-debug.log
 
 # env
 .env
@@ -10,3 +11,16 @@ uploads/
 
 # vscode
 .vscode/
+
+# Docker
+#.dockerignore
+
+# SSL / Certbot
+nginx/certs
+nginx/certs/**
+nginx/certs/**/*
+nginx/certs/accounts
+
+# OS junk
+.DS_Store
+

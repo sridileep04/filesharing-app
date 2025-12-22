@@ -43,7 +43,8 @@ exports.verifyCodePassword = async (req, res) => {
         fileMeta.downloadTokens.push({ token, expiresAt, used: false });
         await fileMeta.save();
 
-        const link = `${process.env.BASE_URL}/api/download/${token}`;
+        const baseUrl=process.env.BASE_URL || `${req.protocol}://${req.get("host")}`
+	const link = `${baseUrl}/api/download/${token}`;
 
         res.json({
             filename: fileMeta.originalname,

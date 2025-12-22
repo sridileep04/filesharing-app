@@ -12,6 +12,7 @@ const startCleanupJob = require('./cron/cleanup');
 const Routes = require('./routes/router');
 
 const app = express();
+app.set("trust proxy", 1);
 
 // Middleware
 app.use(express.json());
@@ -19,6 +20,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+//app.get("*", (req, res) => {
+//  res.sendFile(path.join(__dirname, "public", "404.html"));
+//});
+
 
 // Rate limit
 const apiLimiter = rateLimit({
