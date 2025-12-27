@@ -2,13 +2,28 @@ version: "3.9"
 
 services:
   app:
-    image: filesharing-app
-    container_name: filesharing-combined
+    build: .
+    container_name: filesharing-app
+    expose:
+      - "3000"
+    env_file: .env
+    restart: always
+
+  caddy:
+    image: caddy:2
+    container_name: caddy
     ports:
       - "80:80"
       - "443:443"
-    env_file: .env
     volumes:
-      - ./nginx/certs:/etc/nginx/certs:ro
-      - ./nginx/html:/var/www/certbot:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
     restart: always
+
+volumes:
+  caddy_data:
+  caddy_config:
+

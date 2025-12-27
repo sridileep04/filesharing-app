@@ -15,12 +15,6 @@ uploads/
 # Docker
 #.dockerignore
 
-# SSL / Certbot
-nginx/certs
-nginx/certs/**
-nginx/certs/**/*
-nginx/certs/accounts
-
 # OS junk
 .DS_Store
 
