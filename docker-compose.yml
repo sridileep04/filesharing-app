@@ -3,7 +3,7 @@ version: "3.9"
 services:
   app:
     build: .
-    container_name: filesharing-single
+    container_name: filesharing-single-v2
     ports:
       - "80:80"
       - "443:443"
