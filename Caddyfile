@@ -2,6 +2,6 @@ dileep.dpdns.org {
 
     encode gzip
 
-    reverse_proxy app:3000
+    reverse_proxy 127.0.0.1:3000
 }
 

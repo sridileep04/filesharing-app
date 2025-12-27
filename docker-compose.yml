@@ -3,24 +3,14 @@ version: "3.9"
 services:
   app:
     build: .
-    container_name: filesharing-app
-    expose:
-      - "3000"
-    env_file: .env
-    restart: always
-
-  caddy:
-    image: caddy:2
-    container_name: caddy
+    container_name: filesharing-single
     ports:
       - "80:80"
       - "443:443"
+    env_file: .env
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
       - caddy_config:/config
-    depends_on:
-      - app
     restart: always
 
 volumes:
