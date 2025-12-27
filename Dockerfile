@@ -1,21 +1,27 @@
-# Use Node LTS (stable + secure)
-FROM node:20-alpine
+# ---------- Stage 1: Build Node app ----------
+FROM node:20-alpine AS builder
 
-# Set working directory
 WORKDIR /app
-
-# Copy package files first (better layer caching)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm ci --omit=dev --legacy-peer-deps
-
-# Copy rest of the application
 COPY . .
 
-# Expose the app port
-EXPOSE 3000
+# ---------- Stage 2: Runtime with Nginx ----------
+FROM nginx:alpine
 
-# Start the server
-CMD ["node", "server.js"]
+# Install Node.js
+RUN apk add --no-cache nodejs npm
+
+# Copy app
+COPY --from=builder /app /app
+
+# Copy nginx config
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+WORKDIR /app
+
+EXPOSE 80 443
+
+#CMD sh -c "node server.js & nginx -g 'daemon off;'"
+CMD ["/bin/sh", "-c", "node server.js & nginx -g 'daemon off;'"]
 

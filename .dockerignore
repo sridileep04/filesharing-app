@@ -5,6 +5,7 @@ npm-debug.log
 .gitignore
 Dockerfile
 
-nginx/
+nginx/*
+!nginx/nginx.conf
 certs/
 
