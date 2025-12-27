@@ -40,3 +40,27 @@ docker cp ./server.js filesharing:/app/server.js
 cp filesharing:/app/server.js ./server.js
 docker commit filesharing filesharing-app:2
 ```
+
+```
+
+docker --debug build -t filesharing-app:3 .
+
+docker build --progress=plain -t filesharing-app:3 .
+docker build --progress=plain -t filesharing-app . 2>&1 | tee build.log
+
+# Replace 'abc123id' with the ID of the step before the error
+docker run -it --rm abc123id /bin/sh
+
+COPY . .
+RUN ls -R  # This will print every file Docker has copied during the build logs
+
+docker history filesharing-app:3
+
+docker inspect filesharing-app:3
+
+
+# Replace 'my-filesharing-app' with your actual container name or ID
+docker exec my-filesharing-app printenv
+
+docker run -d   --name filesharing-app-v3   -p 80:80   -p 443:443   --env-file .env   -v $(pwd)/nginx/certs:/etc/nginx/certs:ro   -v $(pwd)/nginx/html:/var/www/certbot:ro   --restart always   filesharing-app:3
+```
