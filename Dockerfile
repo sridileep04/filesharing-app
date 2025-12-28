@@ -39,6 +39,6 @@ COPY Caddyfile /etc/caddy/Caddyfile
 EXPOSE 80 443
 
 # Persistence for SSL certs
-VOLUME ["/data", "/config"]
+#VOLUME ["/data", "/config"]
 
 CMD ["sh", "-c", "node server.js & exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]
