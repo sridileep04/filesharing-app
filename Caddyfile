@@ -1,3 +1,7 @@
+{
+    storage file_system /data
+}
+
 dileep.dpdns.org {
 
     encode gzip
