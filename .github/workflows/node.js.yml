@@ -35,6 +35,44 @@ jobs:
             -not -path "./dist/*" \
             -print \
             -exec node --check {} +
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+
+  # gitleaks-scans:
+  #   runs-on: ubuntu-latest
+  #   needs: compile
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #   - name: Gitleaks Setup
+  #     uses: gitleaks/gitleaks-actions@v2
+  #   - name: Gitleaks Scan
+  #     run: |
+  #       gitleaks detect --source ./ --exit-code 1 --verbose --redact --config .gitleaks.toml
+
+  gitleaks-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    needs: compile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Note: The action handles the exit code 1 automatically!
+          args: detect --source . --verbose --redact
+
+      - name: Install Production Dependencies
+        run: npm ci --omit=dev --legacy-peer-deps
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Test
+        run: npm test
+
+        
