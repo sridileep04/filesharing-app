@@ -61,7 +61,7 @@ jobs:
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.LEAKS_TOKEN }}
         with:
           # Note: The action handles the exit code 1 automatically!
           args: detect --source . --verbose --redact
