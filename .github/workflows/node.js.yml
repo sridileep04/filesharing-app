@@ -125,6 +125,30 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      #handling the lowercase conversion for your username. As docker don't accept captial letters and some special caracters.
+      - name: Lowercase repository name
+        id: lower_repo
+        run: |
+          # 1. Get the username from secrets
+          USER_INPUT="${{ secrets.DOCKER_USERNAME }}"
+          
+          # 2. Lowercase the username
+          LOW_USER="${USER_INPUT,,}"
+          
+          # 3. Use 'sed' to replace any character that IS NOT a-z, 0-9, -, or _ with a dash
+          # The [^a-z0-9_-] means "anything NOT in this list"
+          CLEAN_USER=$(echo "$LOW_USER" | sed 's/[^a-z0-9_-]/-/g')
+          
+          # 4. Combine with app name and export
+          echo "repository=${CLEAN_USER}/filesharing-app" >> $GITHUB_OUTPUT
+
+      #Debug step to see your refs in the logs (outside of Build step)
+      - name: Check variables
+        run: |
+          echo "The Short Ref is: ${{ github.ref_name }}"
+          echo "The Commit SHA is: ${{ github.sha }}"
+          echo "Final Repo Name: ${{ steps.lower_repo.outputs.repository }}"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -137,17 +161,11 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
-
-          # triple tags
+          # 3. Use the lowercase 'repository' output here
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:latest
-            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:${{ github.sha }}
-            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:${{ github.ref_name }}
-      - name: Check my variables
-        run: |
-          echo "The Short Ref is: ${{ github.ref_name }}"
-          echo "The Full Ref is: ${{ github.ref }}"
-          echo "The Commit SHA is: ${{ github.sha }}"
+            ${{ steps.lower_repo.outputs.repository }}:latest
+            ${{ steps.lower_repo.outputs.repository }}:${{ github.sha }}
+            ${{ github.ref_type == 'tag' && format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) || format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) }}
           
       - name: Build
         run: npm run build --if-present
