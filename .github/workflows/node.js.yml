@@ -6,8 +6,8 @@ name: Node.js CICD
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  # pull_request:
+  #   branches: [ "master" ]
 
 jobs:
   compile:
@@ -98,7 +98,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Important: Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
@@ -109,7 +109,46 @@ jobs:
           args: >
             -Dsonar.projectKey=filesharing-app
             -Dsonar.sources=.
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info      
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+  build-and-push-docker-image:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: sonarqube-analysis
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+
+          # triple tags
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:latest
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:${{ github.ref_name }}
+      - name: Check my variables
+        run: |
+          echo "The Short Ref is: ${{ github.ref_name }}"
+          echo "The Full Ref is: ${{ github.ref }}"
+          echo "The Commit SHA is: ${{ github.sha }}"
+          
       - name: Build
         run: npm run build --if-present
 
