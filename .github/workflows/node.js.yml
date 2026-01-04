@@ -151,6 +151,9 @@ jobs:
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+        with:
+          # Only installing the emulator for the target architecture as we are running in amd64 so no need for that
+          platforms: arm64
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -161,6 +164,9 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64,linux/arm64
+          # Using GitHub Actions cache for lightning-fast rebuilds
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           # 3. Use the lowercase 'repository' output here
           tags: |
             ${{ steps.lower_repo.outputs.repository }}:latest
