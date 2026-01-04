@@ -166,7 +166,15 @@ jobs:
             ${{ steps.lower_repo.outputs.repository }}:latest
             ${{ steps.lower_repo.outputs.repository }}:${{ github.sha }}
             ${{ github.ref_type == 'tag' && format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) || format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) }}
-          
+
+      #Deleting older images
+      - name: Delete old images
+        uses: vlaurin/action-dockerhub-untagged-cleaner@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: filesharing-app
+          keep_last: 5
       - name: Build
         run: npm run build --if-present
 
