@@ -173,25 +173,7 @@ jobs:
             ${{ steps.lower_repo.outputs.repository }}:${{ github.sha }}
             ${{ github.ref_type == 'tag' && format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) || format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) }}
 
-      #Deleting older images with no tags
-      - name: Cleanup old untagged images
-        uses: snok/container-retention-policy@v2
-        with:
-          account: ${{ secrets.DOCKER_USERNAME }}
-          token: ${{ secrets.DOCKER_PASSWORD }}
-          image: filesharing-app
-          tag-selection: 'untagged'
-          cut-off: 6
-          
-      - name: Cleanup Old Named Tags
-        uses: snok/container-retention-policy@v2
-        with:
-          account: ${{ secrets.DOCKER_USERNAME }}
-          token: ${{ secrets.DOCKER_PASSWORD }}
-          image: filesharing-app
-          tag-selection: 'tagged'
-          cut-off: 20
-          ignore-tag: 'latest'
+      
           
       - name: Build
         run: npm run build --if-present
