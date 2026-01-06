@@ -167,7 +167,7 @@ jobs:
           load: true
           tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
           cache-from: type=gha
-          cache-to: type=gha,mode=max,scope=deps-v2
+          cache-to: type=gha,mode=min,scope=deps-v2
 
       # STEP 2: Run Trivy Scan
       # If this fails with exit code 1, the workflow stops here and won't push
