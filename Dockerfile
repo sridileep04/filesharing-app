@@ -6,7 +6,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install dependencies
-COPY package.json ./
+COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --legacy-peer-deps
 
 # Copy only the application source code (skip Docker/Git files via .dockerignore)
