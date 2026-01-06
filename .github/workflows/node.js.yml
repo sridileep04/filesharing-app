@@ -72,6 +72,11 @@ jobs:
       - name: Install Production Dependencies
         run: npm ci --omit=dev --legacy-peer-deps
 
+      - name: Verify runtime dependency versions (repo)
+        run: |
+          echo "Verifying dependencies from node_modules:"
+          npm ls cross-spawn glob || true
+
   trivyfs-scan:
     name: trivyfs scanning
     runs-on: ubuntu-latest
@@ -170,6 +175,10 @@ jobs:
           #Enable below if cache is needed
           # cache-from: type=gha
           # cache-to: type=gha,mode=min
+      - name: Verify dependency versions inside image
+        run: |
+          docker run --rm ${{ steps.lower_repo.outputs.repository }}:scan-temp \
+            sh -c "node -v && npm ls cross-spawn glob || true"
 
       # STEP 2: Run Trivy Scan
       # If this fails with exit code 1, the workflow stops here and won't push
