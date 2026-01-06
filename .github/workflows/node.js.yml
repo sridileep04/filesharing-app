@@ -167,7 +167,7 @@ jobs:
           load: true
           tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,scope=deps-v2
 
       # STEP 2: Run Trivy Scan
       # If this fails with exit code 1, the workflow stops here and won't push
@@ -190,8 +190,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           # Using GitHub Actions cache for lightning-fast rebuilds
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=deps-v2
+          #cache-to: type=gha,mode=max,scope=deps-v2
+          
           # 3. Use the lowercase 'repository' output here
           tags: |
             ${{ steps.lower_repo.outputs.repository }}:latest
