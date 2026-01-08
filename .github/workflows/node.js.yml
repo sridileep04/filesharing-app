@@ -255,7 +255,7 @@ jobs:
             DOCKER_IMAGE_NAME=filesharing-app
             DOCKER_IMAGE_TAG=latest
             PORT=3000
-            MONGODB_URL=${{ secrets.MONGO_DB }}
+            MONGODB_URL=${{ secrets.MONGODB_URL }}
             BASE_URL=${{ secrets.BASE }}
             DOWNLOAD_TOKEN_EXPIRY_MIN=30
             MAX_FILE_SIZE_BYTES=104857600 
