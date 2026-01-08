@@ -64,3 +64,4 @@ docker exec my-filesharing-app printenv
 
 docker run -d   --name filesharing-app-v3   -p 80:80   -p 443:443   --env-file .env   -v $(pwd)/nginx/certs:/etc/nginx/certs:ro   -v $(pwd)/nginx/html:/var/www/certbot:ro   --restart always   filesharing-app:3
 ```
+ 
