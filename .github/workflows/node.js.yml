@@ -250,6 +250,10 @@ jobs:
 
             # Create the .env file from GitHub Secrets (Still needed as .env isn't in repo)
             cat <<EOF > .env
+            # --- Docker Image Config ---
+            DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            DOCKER_IMAGE_NAME=filesharing-app
+            DOCKER_IMAGE_TAG=latest
             PORT=3000
             MONGODB_URL=${{ secrets.MONGO_DB }}
             BASE_URL=${{ secrets.BASE }}
