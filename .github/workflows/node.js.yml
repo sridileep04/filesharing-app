@@ -265,6 +265,18 @@ jobs:
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             docker compose pull
             docker compose up -d --remove-orphans
+
+  health-check:
+    name: Verify Deployment
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HTTP Status
+        run: |
+          # 10 seconds to give the app time to boot
+          sleep 10
+          curl -f https://dileep.dpdns.org || exit 1
+            
       - name: Build
         run: npm run build --if-present
 
