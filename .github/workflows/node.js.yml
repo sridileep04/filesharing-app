@@ -116,118 +116,78 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
-  build-and-push-docker-image:
-    name: Build, Scan and Push Docker Image
+  build-amd64:
     runs-on: ubuntu-latest
     needs: sonarqube-analysis
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: docker/setup-buildx-action@v3
 
-      #handling the lowercase conversion for your username. As docker don't accept captial letters and some special caracters.
-      - name: Lowercase repository name
-        id: lower_repo
-        run: |
-          # 1. Get the username from secrets
-          USER_INPUT="${{ secrets.DOCKER_USERNAME }}"
-          
-          # 2. Lowercase the username
-          LOW_USER="${USER_INPUT,,}"
-          
-          # 3. Use 'sed' to replace any character that IS NOT a-z, 0-9, -, or _ with a dash
-          # The [^a-z0-9_-] means "anything NOT in this list"
-          CLEAN_USER=$(echo "$LOW_USER" | sed 's/[^a-z0-9_-]/-/g')
-          
-          # 4. Combine with app name and export
-          echo "repository=${CLEAN_USER}/filesharing-app" >> $GITHUB_OUTPUT
-
-      #Debug step to see your refs in the logs (outside of Build step)
-      - name: Check variables
-        run: |
-          echo "The Short Ref is: ${{ github.ref_name }}"
-          echo "The Commit SHA is: ${{ github.sha }}"
-          echo "Final Repo Name: ${{ steps.lower_repo.outputs.repository }}"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          # Only installing the emulator for the target architecture as we are running in amd64 so no need for that
-          platforms: arm64
-
-      # We build only for the runner's native architecture (amd64) and load it into the daemon
       - name: Build AMD64 image for scanning
         uses: docker/build-push-action@v5
         with:
           context: .
           load: true
           platforms: linux/amd64
-          tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
-          cache-from: type=gha,scope=amd64
-          cache-to: type=gha,mode=max,scope=amd64
+          tags: ${{ secrets.DOCKER_USERNAME }}/filesharing-app:scan-temp
 
-      - name: Verify dependency versions inside image
-        run: |
-          docker run --rm ${{ steps.lower_repo.outputs.repository }}:scan-temp \
-            sh -c "node -v && npm ls cross-spawn glob || true"
-
-      # If this fails with exit code 1, the workflow stops here and won't push
       - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
-          image-ref: '${{ steps.lower_repo.outputs.repository }}:scan-temp'
-          format: 'table'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
-          exit-code: '1'
+          image-ref: '${{ secrets.DOCKER_USERNAME }}/filesharing-app:scan-temp'
+          severity: CRITICAL,HIGH
+          exit-code: 1
 
-      # ARM64 cache warm-up build
-      - name: Warm up ARM64 cache (no push, no load)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/arm64
-          push: false
-          cache-from: type=gha,scope=arm64
-          cache-to: type=gha,mode=max,scope=arm64
-
-      # This will push both amd64 and arm64. Docker Buildx will reuse the cache from Step 1.
-      - name: Build and push
+      - name: Push AMD64 image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          #no-cache: true
-          platforms: linux/amd64,linux/arm64
-          # Using GitHub Actions cache for lightning-fast rebuilds
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=max
-          cache-from: |
-            type=gha,scope=amd64
-            type=gha,scope=arm64
-          cache-to: |
-            type=gha,mode=max,scope=amd64
-            type=gha,mode=max,scope=arm64
-          
-          # 3. Use the lowercase 'repository' output here
-          tags: |
-            ${{ steps.lower_repo.outputs.repository }}:latest
-            ${{ steps.lower_repo.outputs.repository }}:${{ github.sha }}
-            ${{ github.ref_type == 'tag' && format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) || format('{0}:{1}', steps.lower_repo.outputs.repository, github.ref_name) }}
+          platforms: linux/amd64
+          tags: ${{ secrets.DOCKER_USERNAME }}/filesharing-app:amd64-${{ github.sha }}
 
+# ARM64 BUILD (NO QEMU)
+  build-arm64:
+    runs-on: ubuntu-24.04-arm
+    needs: sonarqube-analysis
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build & push ARM64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/filesharing-app:arm64-${{ github.sha }}
+
+# MULTI-ARCH MANIFEST
+  publish-manifest:
+    runs-on: ubuntu-latest
+    needs: [build-amd64, build-arm64]
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - run: |
+          docker manifest create \
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:latest \
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:amd64-${{ github.sha }} \
+            ${{ secrets.DOCKER_USERNAME }}/filesharing-app:arm64-${{ github.sha }}
+          docker manifest push ${{ secrets.DOCKER_USERNAME }}/filesharing-app:latest
 
   deploy:
     name: Deploy to Server
-    needs: build-and-push-docker-image
+    needs: publish-manifest
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
