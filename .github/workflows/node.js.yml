@@ -170,6 +170,8 @@ jobs:
         with:
           context: .
           load: true
+          #building only for amd64 for scaning as github runner is amd64
+          platforms: linux/amd64
           tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
           no-cache: true
           #Enable below if cache is needed
