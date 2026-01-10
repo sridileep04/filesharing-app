@@ -184,7 +184,6 @@ jobs:
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: '${{ steps.lower_repo.outputs.repository }}:scan-temp'
-          ignore-policy: .trivyignore
           format: 'table'
           ignore-unfixed: true
           vuln-type: 'os,library'
