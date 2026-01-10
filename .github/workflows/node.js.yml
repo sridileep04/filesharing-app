@@ -24,7 +24,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        #cache: 'npm'
+        cache: 'npm'
 
     - name: Code compilation (Syntax Check)
       run: |
@@ -173,10 +173,10 @@ jobs:
           #building only for amd64 for scaning as github runner is amd64
           platforms: linux/amd64
           tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
-          no-cache: true
+          #no-cache: true
           #Enable below if cache is needed
-          # cache-from: type=gha
-          # cache-to: type=gha,mode=min
+          cache-from: type=gha
+          cache-to: type=gha,mode=min
       - name: Verify dependency versions inside image
         run: |
           docker run --rm ${{ steps.lower_repo.outputs.repository }}:scan-temp \
@@ -201,11 +201,11 @@ jobs:
         with:
           context: .
           push: true
-          no-cache: true
+          #no-cache: true
           platforms: linux/amd64,linux/arm64
           # Using GitHub Actions cache for lightning-fast rebuilds
-          # cache-from: type=gha
-          #cache-to: type=gha,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           
           # 3. Use the lowercase 'repository' output here
           tags: |
