@@ -154,47 +154,53 @@ jobs:
           echo "The Commit SHA is: ${{ github.sha }}"
           echo "Final Repo Name: ${{ steps.lower_repo.outputs.repository }}"
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
           # Only installing the emulator for the target architecture as we are running in amd64 so no need for that
           platforms: arm64
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # STEP 1: Build locally for scanning
       # We build only for the runner's native architecture (amd64) and load it into the daemon
-      - name: Build local image for scanning
+      - name: Build AMD64 image for scanning
         uses: docker/build-push-action@v5
         with:
           context: .
           load: true
-          #building only for amd64 for scaning as github runner is amd64
           platforms: linux/amd64
           tags: ${{ steps.lower_repo.outputs.repository }}:scan-temp
-          #no-cache: true
-          #Enable below if cache is needed
-          cache-from: type=gha
-          cache-to: type=gha,mode=min
+          cache-from: type=gha,scope=amd64
+          cache-to: type=gha,mode=max,scope=amd64
+
       - name: Verify dependency versions inside image
         run: |
           docker run --rm ${{ steps.lower_repo.outputs.repository }}:scan-temp \
             sh -c "node -v && npm ls cross-spawn glob || true"
 
-      # STEP 2: Run Trivy Scan
       # If this fails with exit code 1, the workflow stops here and won't push
       - name: Trivy Image Scan
         uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: '${{ steps.lower_repo.outputs.repository }}:scan-temp'
+          ignore-policy: .trivyignore
           format: 'table'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
           exit-code: '1'
 
-      # STEP 3: Final Build and Push
+      # ARM64 cache warm-up build
+      - name: Warm up ARM64 cache (no push, no load)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: false
+          cache-from: type=gha,scope=arm64
+          cache-to: type=gha,mode=max,scope=arm64
+
       # This will push both amd64 and arm64. Docker Buildx will reuse the cache from Step 1.
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -204,8 +210,14 @@ jobs:
           #no-cache: true
           platforms: linux/amd64,linux/arm64
           # Using GitHub Actions cache for lightning-fast rebuilds
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
+          cache-from: |
+            type=gha,scope=amd64
+            type=gha,scope=arm64
+          cache-to: |
+            type=gha,mode=max,scope=amd64
+            type=gha,mode=max,scope=arm64
           
           # 3. Use the lowercase 'repository' output here
           tags: |
