@@ -192,3 +192,22 @@ body {
         transform: translateY(0);
     }
 }
+/* Styling the globe */
+.fa-globe-asia {
+        color: #2ecc71 !important; /* Earth Green */
+        margin-right: 12px; /* Increased margin for the larger icon */
+        font-size: 3.5rem;   /* This makes the icon 1.5x larger than the text */
+        vertical-align: middle; /* Keeps it centered with the text */
+  }
+  
+  /* Custom speed for the rotation */
+  .fa-spin {
+    animation-duration: 2s !important;
+  }
+  
+  /* change button style when loading */
+  .loading {
+    cursor: not-allowed;
+    opacity: 0.8;
+    filter: grayscale(0.5);
+  }

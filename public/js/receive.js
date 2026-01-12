@@ -3,6 +3,12 @@ document.getElementById('verifyForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const code = document.getElementById('code').value.trim();
     const password = document.getElementById('password').value;
+    const submitButton = e.target.querySelector('button[type="submit"]');
+
+    // Disable the button and add animation
+    submitButton.disabled = true;
+    submitButton.classList.add('loading');
+    submitButton.innerHTML = '<i class="fas fa-globe-asia fa-spin fa-lg"></i> Uploading...';
 
     try {
         const res = await fetch('/api/verify', {
@@ -13,6 +19,7 @@ document.getElementById('verifyForm').addEventListener('submit', async (e) => {
         const data = await res.json();
         if (!res.ok) {
             showError((data && data.error) || 'Verification failed');
+            resetButton(submitButton);
             return;
         }
         // show file info and set download
@@ -26,8 +33,16 @@ document.getElementById('verifyForm').addEventListener('submit', async (e) => {
     } catch (err) {
         console.error(err);
         showError('Network error');
+    } finally {
+        resetButton(submitButton);
     }
 });
+
+function resetButton(button) {
+    button.disabled = false;
+    button.classList.remove('loading');
+    button.innerHTML = 'Verify';
+}
 
 function showError(msg) {
     const el = document.getElementById('error');

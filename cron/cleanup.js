@@ -2,7 +2,7 @@ const FileMeta = require("../models/FileMeta");
 const deleteGridFsFile = require("../utils/deleteGridFsFile");
 
 module.exports = function startCleanupJob(app) {
-    const INTERVAL = 30 * 60 * 1000; // 5 minutes
+    const INTERVAL = 60 * 60 * 1000;
 
     setInterval(async () => {
         console.log("Cleaning expired files...");

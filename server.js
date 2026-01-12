@@ -1,4 +1,3 @@
-//require('dotenv').config();
 require("dotenv").config({ path: __dirname + "/.env" });
 
 const express = require('express');
@@ -24,15 +23,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-//app.get("*", (req, res) => {
-//  res.sendFile(path.join(__dirname, "public", "404.html"));
-//});
-
 
 // Rate limit
 const apiLimiter = rateLimit({
     windowMs: 30 * 1000,
-    max: 2,
+    max: 10,
     message: "Too many requests"
 });
 app.use('/api/', apiLimiter);
@@ -42,6 +37,7 @@ mongoose.connect(process.env.MONGODB_URL)
     .then(() => console.log("MongoDB connected"))
     .catch(err => console.error("Mongo Error:", err));
 
+
 // GridFS initialization
 const conn = mongoose.connection;
 let gridfsBucket;
@@ -49,7 +45,6 @@ conn.once("open", () => {
     gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, { bucketName: "uploads" });
     app.locals.gfsBucket = gridfsBucket;
 });
-
 
 // Routes
 app.use('/api', Routes);
